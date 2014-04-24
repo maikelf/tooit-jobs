@@ -96,7 +96,7 @@ settings[toggle_search] = 1
 
 ; JavaScript
 ; --------------
-; exclude[js][] = 'modules/contextual/contextual.js'
+exclude[js][] = 'modules/contextual/contextual.js'
 
 ; CSS
 ; --------------

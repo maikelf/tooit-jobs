@@ -1,0 +1,150 @@
+<?php
+
+function maikel_custom_init() {
+
+}
+/*-------------------hook menu------------------------------------------------------------------------*/
+function maikel_custom_menu()
+{
+	$items['admin/config/development/validations'] = array( 
+	'title' => t('Validate Content Type forms'), 
+	'description' => 'validate content type form', 
+	'page callback' => 'drupal_get_form', 
+	'page arguments' => array('maikel_custom_settings'), 
+	'access arguments' => array('administer site configuration'), 
+	'type' => MENU_NORMAL_ITEM, 
+	); 
+	
+	return $items;
+}
+/*-------------------build administration form---------------------------------------------------------*/
+function maikel_custom_settings($form, &$form_state)
+{
+	$options_first = ajax_get_first_dropdown_options();
+	
+	$selected = isset($form_state['values']['validations_node_types']) ? $form_state['values']['validations_node_types'] : key($options_first);
+
+	$form['validations_node_types'] = array( 
+	'#type' => 'select', 
+	'#title' => t('Content Type'), 
+	'#options' => $options_first, 
+	'#default_value' => $selected,
+	'#description' => t('Select Content Type'), 
+	'#required' => true,
+	
+	'#ajax' => array(
+		'event' => 'change',
+		'callback' => 'maikel_custom_field_ajax_callback',
+		'wrapper' => 'dropdown_field_replace',
+		),
+	); 
+	
+	$form['validations_field']=array(
+		'#type' => 'select', 
+		'#title' => t('Fields'), 
+		'#options' => maikel_custom_second_dropdown_options($selected),
+		'#prefix' => '<div id="dropdown_field_replace">',
+		'#suffix' => '</div>',
+		'#required' => true,
+	);
+	
+	$form['rule']=array(
+		'#type' => 'checkboxes', 
+		'#title' => t('Rules'), 
+		'#options' => maikel_custom_get_rules(),
+		'#required' => true,
+	);
+
+	$form['#submit'][0] = 'maikel_custom_settings_submit'; 
+	return system_settings_form($form);
+}
+
+/*------------Get content type. This value is used in content type field options-----------------*/
+
+function ajax_get_first_dropdown_options()
+{
+$types = node_type_get_types(); 
+		foreach($types as $node_type) 
+		{ 
+		$options[$node_type->type] = $node_type->name; 
+		}
+		
+		return $options;
+}
+/*------------------------------------------------------------------------------------------------*/
+function maikel_custom_settings_submit($form, $form_state)
+{
+	$content_type=$form_state['input']['validations_node_types'];
+	$content_field=$form_state['input']['validations_field'];
+	
+	if(count($form_state['input']['rule'])>0)
+	{
+		drupal_set_message('Este formulario no implementa nada aun. En un futuro pretende validar formularios mediante expresiones regulares. En este caso usted ha seleccionado validar el campo '.$content_field.' del tipo de contenido '.$content_type, 'status');
+	}
+	else
+	{
+	  drupal_set_message('Debe seleccionar una regla', 'error');
+	}
+}
+/*-----------------------------Render validations_field ------------------------------------------*/
+function maikel_custom_field_ajax_callback($form, $form_state)
+{
+	return $form['validations_field'];
+}
+/*---------get option of second dropdow, return field of a specific content type------------------*/
+function maikel_custom_second_dropdown_options($key='')
+{
+	$the_fields = field_info_instances("node", $key);
+	foreach($the_fields as $f) 
+		{ 
+			$options[$f['field_name']] = $f['label'];
+		}
+
+return $options;
+}
+/*-------------------------define validations rule------------------------------------------------*/
+function maikel_custom_get_rules()
+{
+	$options[0]= t('Only -a- to -z-, lowercase  and uppercase');
+	$options[1]= t('Avoid extremely long words');
+
+return $options;
+}
+
+/*--------------------------search------------------------------------------*/ 
+
+function maikel_custom_search_info() 
+{ 
+return array( 
+'title' => 'Hello', 
+); 
+} 
+
+function maikel_custom_search_access() 
+{ 
+return user_access('Use search'); 
+}
+
+function maikel_custom_search_execute($keys = NULL) 
+{ 
+	$find = array(); 
+		
+		$query = db_select('field_data_body')->extend('PagerDefault'); 
+		$query->fields('field_data_body', array('revision_id')); 
+		$query->condition('body_value', '%' . db_like($keys) . '%', 'LIKE'); 
+
+		$result = $query 
+		->limit(15) 
+		->execute();
+	
+	foreach ($result as $alias) 
+	{ 
+
+		$l=node_load($alias->revision_id);
+		$find[] = array('title' => $l->title, 'link' => url('node/'.$l->nid, array('absolute' => TRUE))); 
+		
+	}
+	
+	return $find; 
+} 
+

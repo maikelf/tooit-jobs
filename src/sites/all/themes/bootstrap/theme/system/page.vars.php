@@ -9,7 +9,7 @@
  *
  * @see page.tpl.php
  */
-function bootstrap_preprocess_page(&$variables) {
+function bootstrap_preprocess_page(&$variables, $bootstrap_preprocess_page) {
   // Add information about the number of sidebars.
   if (!empty($variables['page']['sidebar_first']) && !empty($variables['page']['sidebar_second'])) {
     $variables['content_column_class'] = ' class="col-sm-6"';

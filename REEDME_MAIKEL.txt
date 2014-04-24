@@ -1,0 +1,27 @@
+tooit-jobs
+==========
+
+Changelog
+
+1- Added settings.php  with $database array and parameters.
+
+2- Change root password: user:root pass:tooit
+
+3- Solved the PHP notice displayed on watchdog "bootstrap preprocess_page in bootstrap preprocess_page()". Added $bootstrap_preprocess_page variable as a parameter of the bootstrap_preprocess_page() function in theme, specifically in /sites/all/themes/bootstrap/theme/system/page.vars.php
+
+4- Created the "Hello" and "World" content type.
+
+5- Activated the module "Field UI" to management fields in "Hello" and "World" content types.
+
+6- Installed "Date" module to create date field in "Hello" Content type
+
+7- Installed "reference" module to create "hello" field in "World" content type (this field is reference to "Hello" content type)
+
+8- Installed "jquery_update" module to solved the conflict between theme bootstrap and jquery UI. All java script errors were solved.
+
+9- Activated the module "search".
+
+10- Created and installed "maikel_custom" module, that implement the form and search API.
+
+	- To view the form, you must be registered (user:root  pass:tooit). You can view the form in (admin/config/development/validations)
+	- To view searchapi for the "hello" bundle, you must be registered(user:root  pass:tooit). Places the "Hello" tab at the top of the search form for our search of "Hello" content type.
